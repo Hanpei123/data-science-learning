@@ -1,6 +1,6 @@
 # Data Science Learning Plan
  
-***6-month study plan of data science concepts and techniques:*** 
+***Study plan of data science concepts and techniques:*** 
  
 ### Weeks 1-2: Data Analysis Fundamentals and Statistics 
 Goal: Refresh your knowledge of data analysis concepts and statistical techniques.    
