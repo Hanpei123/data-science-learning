@@ -41,7 +41,7 @@ I collect a set of data (n = 100 observations) containing a single predictor and
 
 ## Question 5
 Consider the fitted values that result from performing linear regression without an intercept. In this setting, the ith fitted value takes the form:
-$$\hat{y}_i = x_iβ$$
+$$\hat{y}_i = x_i \hat{β}$$
 where
 
 $$\hat{β} = (\sum_{i=1}^{n} x_i y_i)/(\sum_{i'=1}^{n} x_{i'}^{2})$$
