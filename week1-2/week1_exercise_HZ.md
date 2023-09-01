@@ -100,15 +100,19 @@ Note: We interpret this result by saying that the fitted values from linear regr
 ## Answer 5
 
 In linear regression without an intercept, the fitted value for the ith observation, denoted as $\hat{y}_i$, is given by:
+
 $$\hat{y}_i = x_i\hat{\beta}$$
 
 To find $\hat{\beta}$, let's substitute the formula for $\hat{\beta}$ into the expression for $\hat{y}_i$:  
+
 $$\hat{y}_i = x_i \left(\frac{\sum_{i'=1}^{n} x_{i'} y_{i'}}{\sum_{i''=1}^{n} x_{i''}^{2}}\right)$$
 
 Now, let's simplify this expression:  
+
 $$\hat{y}_i = \frac{x_i}{\sum_{i''=1}^{n} x_{i''}^{2}} \sum_{i'=1}^{n} x_{i'} y_{i'}$$
 
 We can observe that the term $\frac{x_i}{\sum_{i''=1}^{n} x_{i''}^{2}}$ is a constant for each observation, which we can denote as $a_{i'}$. Therefore, we can rewrite the expression for $\hat{y}i$ as:  
+
 $$\hat{y}_i = \sum_{i'=1}^{n} a_{i'} y_{i'}$$
 
 In this formulation, $a_{i'} = \frac{x_i}{\sum_{i'=1}^{n} x_{i'}^{2}}$ represents the weight or coefficient assigned to each response value $y_{i'}$ in the linear combination.
@@ -230,3 +234,100 @@ This proves that in the case of simple linear regression, when assuming $\bar{x}
 It's important to note that this proof assumes the assumption of $\bar{x} = \bar{y} = 0$. In practice, the proof holds even if the means are non-zero, but theassumption simplifies the calculations. Additionally, this proof is specific to simple linear regression and may not hold for more complex regression models.
 
 I hope this explanation clarifies the relationship between the coefficient of determination $R^2$ and the correlation coefficient $\rho_{XY}$ in simple linear regression. 
+
+
+# Exercise for Linear Regression
+
+## Question 1
+Describe the impact of violating the normality assumption in linear regression on hypothesis testing and confidence intervals.
+
+### Answer
+
+Hypothesis Testing:
+Hypothesis testing in linear regression often involves testing the significance of the regression coefficients or comparing models. Violating the normality assumption can affect the accuracy of p-values and lead to incorrect conclusions.
+
+(a) Type I Error: If the residuals deviate significantly from normality and follow a skewed or heavy-tailed distribution, it can lead to inflated or deflated p-values. This means that there is an increased risk of committing a Type I error, where a variable is considered statistically significant when it is not, or vice versa.
+
+(b) Inaccurate p-values: The p-values obtained from hypothesis tests assume that the residuals are normally distributed. When this assumption is violated, the p-values may not accurately reflect the true statistical significance of the predictors. This can lead to misleading interpretations and incorrect decisions regarding the importance of variables.
+
+(c) Incorrect model comparisons: Violating normality can also affect comparisons between different models, such as nested or non-nested models. Comparing models based on likelihood ratio tests or other statistical measures assumes normality of the residuals. If this assumption is violated, the model comparisons may be biased, leading to incorrect model selection.
+
+Confidence Intervals:
+Confidence intervals provide a range of plausible values for the estimated regression coefficients. Violating the normality assumption can impact the width and accuracy of confidence intervals.
+
+(a) Inaccurate interval widths: Normality assumption is crucial for determining the appropriate standard errors of the coefficients. When normality is violated, the standard errors may be underestimated or overestimated. This can result in confidence intervals that are wider or narrower than they should be, potentially leading to incorrect precision assessments.
+
+(b) Biased confidence intervals: If the residuals do not follow a normal distribution, the confidence intervals may be biased. This bias can occur when the true distribution of the coefficients is asymmetric or has heavy tails. Biased confidence intervals can lead to incorrect inferences and wrong interpretations about the precision and significance of the coefficients.
+
+Overall, violating the normality assumption in linear regression can impact hypothesis testing and confidence intervals by potentially inflating or deflating p-values, leading to incorrect model comparisons, producing inaccurate interval widths, and introducing bias into the confidence intervals. Thus, it is essential to assess the normality assumption and consider alternative techniques or transformations when dealing with non-normal residuals.
+
+## Question 2
+How does multicollinearity affect the interpretation of coefficient estimates in linear regression? Provide an example.
+
+### Answer 2
+
+Impact on Interpretation:
+(a) Unreliable or unstable coefficient estimates: Multicollinearity makes it difficult to determine the individual effect of each predictor variable on the response variable. The coefficients become unstable because the presence of multicollinearity inflates the standard errors, making it challenging to identify the precise contribution of each predictor. As a result, the interpretation of individual coefficients becomes unreliable.
+
+(b) Inconsistent signs and magnitudes: Multicollinearity can lead to counterintuitive or inconsistent signs and magnitudes of the coefficient estimates. For example, a positive relationship between a predictor and the response variable may appear negative when other highly correlated predictors are included in the model. This inconsistency arises because the multicollinearity obscures the true relationship between the predictors and the response.
+
+(c) Loss of interpretability: Multicollinearity complicates the interpretation of coefficients, making it difficult to attribute changes in the response variable to specific predictors accurately. When the predictors are highly correlated, isolating the effect of a single predictor becomes challenging, as the effects of other correlated predictors get entangled.
+
+Example:
+Let's consider an example of predicting housing prices based on two predictor variables: square footage (SqFt) and number of bedrooms (Bedrooms). Suppose these variables are highly correlated, with a correlation coefficient of 0.8. When multicollinearity is present:
+
+The coefficient estimates can be affected. Let's say the coefficient estimate for SqFt is 1000, indicating that, on average, for each additional square foot, the price increases by $1000. However, the coefficient estimate for the Bedrooms variable might be -5000, suggesting that, on average, each additional bedroom decreases the price by $5000. These estimates seem counterintuitive since one would expect that both SqFt and Bedrooms contribute positively to the housing price.
+
+The presence of multicollinearity makes it difficult to precisely determine the influence of each predictor. It becomes challenging to answer questions like "How much does an additional bedroom contribute to the price, considering the square footage remains the same?" as the effects of SqFt and Bedrooms get intertwined.
+
+In such a scenario, it is crucial to address multicollinearity by either removing one of the correlated predictors or using advanced techniques like principal component analysis (PCA) or ridge regression to mitigate the issues it causes.
+
+## Question 3
+In linear regression, the coefficient can be interpreted as the average change in the dependent variable for each unit change in the independent variable, making it meaningful to consider it as an average measure. Explain this in details.
+
+### Answer 3
+The relationship between the coefficient and the average can be understood by considering the interpretation of the coefficient in the context of the regression equation. In a simple linear regression, where we have only one independent variable, the regression equation can be written as:
+
+Y = β0 + β1*X + ε
+
+Here, Y is the dependent variable, X is the independent variable, ε represents the error term, and β0 and β1 are the coefficients associated with the intercept and the independent variable, respectively.
+Now, if we take the average of both sides of the equation, assuming that our sample size is representative of the population, we obtain:
+
+Average(Y) = Average(β0) + Average(β1*X) + Average(ε)
+
+Since the error term ε has a mean of zero, we can simplify the equation as:
+
+Average(Y) = β0 + Average(β1*X)
+
+Now, consider the term Average(β1*X). The product of the coefficient β1 and the average of the independent variable X represents the expected change in the dependent variable for a one-unit change in the independent variable, on average. In other words, the coefficient β1 can be interpreted as the average change in the dependent variable associated with a unit change in the independent variable.
+
+Therefore, in linear regression, the coefficient can be interpreted as the average change in the dependent variable for each unit change in the independent variable, making it meaningful to consider it as an average measure.
+
+## Question 4
+Explain the "inflation" of the Variable inflation factor? What term inflated and how?
+
+### Answer 4
+To understand how VIF measures inflation, let's consider a multiple linear regression model with several predictor variables. The VIF for a particular predictor variable quantifies how much the variance of its coefficient estimate is inflated due to its correlation with other predictors in the model.
+
+Here's how the inflation occurs and how it is measured:
+
+Calculation of VIF:
+The VIF is calculated for each predictor variable by regressing it against all the other predictor variables in the model. Mathematically, the VIF for the ith predictor is calculated as the ratio of the variance of its coefficient estimate to the variance that would be obtained if there were no correlation with other predictors.
+
+Inflation of Variance:
+When predictor variables are highly correlated, it becomes challenging to determine the individual contribution of each variable. The presence of multicollinearity causes the variance of the coefficient estimates to increase, resulting in inflated standard errors.
+
+The inflation occurs because the correlated predictors provide redundant information, making it difficult to untangle their effects on the response variable. As a result, the coefficient estimates become less precise, leading to larger variances and standard errors.
+
+Interpretation of VIF:
+The VIF is interpreted as a measure of how much the variance of a particular coefficient estimate is inflated due to multicollinearity. VIF values greater than 1 indicate the presence of multicollinearity, with higher values indicating more severe inflation.
+
+For example, a VIF of 2 means that the variance of the coefficient estimate for a predictor is twice as large as it would be if there were no correlation with other predictors. Similarly, a VIF of 5 indicates that the variance is five times larger.
+
+Generally, a rule of thumb is that VIF values above 5 or 10 suggest the presence of significant multicollinearity, although specific thresholds may vary depending on the context and field of study.
+
+By examining the VIF values for each predictor variable, we can identify the variables contributing to multicollinearity and assess their impact on the precision and reliability of the coefficient estimates.
+
+To address multicollinearity and reduce the inflation of VIF, techniques such as removing highly correlated predictors, using dimensionality reduction methods like principal component analysis (PCA), or employing regularization techniques like ridge regression can be utilized.
+
+In summary, the "inflation" in the Variable Inflation Factor (VIF) refers to the increase in the variance of the coefficient estimates caused by multicollinearity. The VIF quantifies this inflation by comparing the variance of a predictor's coefficient estimate with the variance it would have in the absence of correlation with other predictors.

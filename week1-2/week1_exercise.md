@@ -1,4 +1,4 @@
-# Conceptual Exercise Questions
+# ISLP Conceptual Exercise Questions
 
 ## Question 1
 Describe the null hypotheses to which the p-values given in Table 3.4 correspond. Explain what conclusions you can draw based on these p-values. Your explanation should be phrased in terms of sales, TV, radio, and newspaper, rather than in terms of the coefficients of the linear model.
@@ -56,3 +56,21 @@ Using (3.4), argue that in the case of simple linear regression, the least squar
 
 ## Question 7
 It is claimed in the text that in the case of simple linear regression of Y onto X, the $R^2$ statistic (3.17) is equal to the square of the correlation between X and Y (3.18). Prove that this is the case. For simplicity, you may assume that $\bar{x}$ = $\bar{y}$ = 0.
+
+
+# Exercise for Linear Regression
+
+## Question 1
+Describe the impact of violating the normality assumption in linear regression on hypothesis testing and confidence intervals.
+
+
+## Question 2
+How does multicollinearity affect the interpretation of coefficient estimates in linear regression? Provide an example.
+
+
+## Question 3
+In linear regression, the coefficient can be interpreted as the average change in the dependent variable for each unit change in the independent variable, making it meaningful to consider it as an average measure. Explain this in details.
+
+
+## Question 4
+Explain the inflation of the Variable inflation factor? What term inflated and how?
