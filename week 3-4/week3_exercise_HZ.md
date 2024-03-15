@@ -1,4 +1,4 @@
-# ISLP Conc\$eptual Exercise Questions
+# ISLP Conceptual Exercise Questions
 
 ## Question 1
  Proving the Equivalence of the Logistic Function and Logit Representation in Logistic Regression
@@ -49,11 +49,11 @@ Through this proof, we have demonstrated that the logistic function representati
 ## Question 2
 #### Bayes Classifier and Discriminant Function Maximization
 
-The Bayes classifier is a fundamental concept in statistical classification that assigns an observation to the class with the highest posterior probability, given the observation. When the observations in the $k\$th class are assumed to be drawn from a normal distribution $N(\mu_k, \sigma^2)\$, with a common variance $\sigma^2\$ across classes but different means $\mu_k\$, the Bayes classifier can be shown to assign an observation to the class for which the discriminant function is maximized.
+The Bayes classifier is a fundamental concept in statistical classification that assigns an observation to the class with the highest posterior probability, given the observation. When the observations in the $k\$ th class are assumed to be drawn from a normal distribution $N(\mu_k, \sigma^2)\$, with a common variance $\sigma^2\$ across classes but different means $\mu_k\$, the Bayes classifier can be shown to assign an observation to the class for which the discriminant function is maximized.
 
 #### Assumptions
 
-- Observations in the $k\$th class follow a normal distribution $N(\mu_k, \sigma^2)\$.
+- Observations in the $k\$ th class follow a normal distribution $N(\mu_k, \sigma^2)\$.
 - The prior probabilities of each class, $P(Y=k)\$, are known.
 
 #### Discriminant Function for Normal Distribution
