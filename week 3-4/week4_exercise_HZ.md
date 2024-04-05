@@ -648,95 +648,139 @@ abline(v = y - lambda / 2, lty = 2)
 > We will now derive the Bayesian connection to the lasso and ridge regression
 > discussed in Section 6.2.2.
 >
-> a. Suppose that $y_i = \beta_0 + \sum_{j=1}^p x_{ij}\beta_j + \epsilon_i$
->    where $\epsilon_1, ..., \epsilon_n$ are independent and identically
->    distributed from a $N(0, \sigma^2)$ distribution. Write out the likelihood
->    for the data.
+> a. Suppose that $y_i = \beta_0 + \sum_{j=1}^p x_{ij}\beta_j + \epsilon_i$ where $\epsilon_1, ..., \epsilon_n$ are independent and identically distributed from a $N(0, \sigma^2)$ distribution. Write out the likelihood for the data.
 
-\begin{align*}
-\mathcal{L} 
-  &= \prod_i^n \mathcal{N}(0, \sigma^2) \\
-  &= \prod_i^n \frac{1}{\sqrt{2\pi\sigma}}\exp\left(-\frac{\epsilon_i^2}{2\sigma^2}\right) \\
-  &= \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2\right)
-\end{align*}
-
-> b. Assume the following prior for $\beta$: $\beta_1, ..., \beta_p$ are
->    independent and identically distributed according to a double-exponential
->    distribution with mean 0 and common scale parameter b: i.e.
->    $p(\beta) = \frac{1}{2b}\exp(-|\beta|/b)$. Write out the posterior for
->    $\beta$ in this setting.
-
-The posterior can be calculated by multiplying the prior and likelihood
-(up to a proportionality constant).
-
-\begin{align*}
-p(\beta|X,Y) 
-  &\propto \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2\right) \prod_j^p\frac{1}{2b}\exp\left(-\frac{|\beta_j|}{b}\right)  \\
-  &\propto \frac{1}{2b} \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 -\sum_j^p\frac{|\beta_j|}{b}\right)
-\end{align*}
-
-> c. Argue that the lasso estimate is the _mode_ for $\beta$ under this
->    posterior distribution.
-
-Let us find the maximum of the posterior distribution (the mode). Maximizing
-the posterior probability is equivalent to maximizing its log which is:
+Given the model:
 
 $$
-\log(p(\beta|X,Y)) \propto  \log\left[ \frac{1}{2b} \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \right ] - \left(\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 + \sum_j^p\frac{|\beta_j|}{b}\right)
+y_i = \beta_0 + \sum_{j=1}^p x_{ij}\beta_j + \epsilon_i
 $$
 
-Since, the first term is independent of $\beta$, our solution will be when
-we minimize the second term.
+where $\epsilon_1, ..., \epsilon_n$ are independent and identically distributed from a $N(0, \sigma^2)$ distribution, the likelihood for the data can be written as follows:
 
-\begin{align*}
-\DeclareMathOperator*{\argmin}{arg\,min} % Jan Hlavacek
-\argmin_\beta \left(\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 + \sum_j^p\frac{|\beta|}{b}\right)
-&= \argmin_\beta \left(\frac{1}{2\sigma^2} \right ) \left( \sum_i^n \epsilon_i^2 +\frac{2\sigma^2}{b}\sum_j^p|\beta_j|\right) \\
-&= \argmin_\beta \left( \sum_i^n \epsilon_i^2 +\frac{2\sigma^2}{b}\sum_j^p|\beta_j|\right)
-\end{align*}
-
-Note, that $RSS = \sum_i^n \epsilon_i^2$ and if we set $\lambda =
-\frac{2\sigma^2}{b}$, the mode corresponds to lasso optimization.
-$$
-\argmin_\beta RSS + \lambda\sum_j^p|\beta_j|
-$$
-
-> d. Now assume the following prior for $\beta$: $\beta_1, ..., \beta_p$ are
->    independent and identically distributed according to a normal distribution
->    with mean zero and variance $c$. Write out the posterior for $\beta$ in
->    this setting.
-
-The posterior is now:
-
-\begin{align*}
-p(\beta|X,Y) 
-  &\propto \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2\right) \prod_j^p\frac{1}{\sqrt{2\pi c}}\exp\left(-\frac{\beta_j^2}{2c}\right)  \\
-  &\propto 
-   \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n 
-   \left(\frac{1}{\sqrt{2\pi c}}\right)^p
-\exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 - \frac{1}{2c}\sum_j^p\beta_j^2\right)
-\end{align*}
-
-> e. Argue that the ridge regression estimate is both the _mode_ and the _mean_
->    for $\beta$ under this posterior distribution.
-
-To show that the ridge estimate is the mode we can again find the maximum by
-maximizing the log of the posterior. The log is 
+The probability density function (pdf) for a single observation $y_i$, given $\beta_0, \beta_1, ..., \beta_p$, and $\sigma^2$, assuming $\epsilon_i \sim N(0, \sigma^2)$, is:
 
 $$
-\log{p(\beta|X,Y)}
-  \propto 
-   \log{\left[\left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \left(\frac{1}{\sqrt{2\pi c}}\right)^p \right ]}
-- \left(\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 + \frac{1}{2c}\sum_j^p\beta_j^2 \right)
+f(y_i | \beta_0, \beta_1, ..., \beta_p, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_i - \beta_0 - \sum_{j=1}^p x_{ij}\beta_j)^2}{2\sigma^2}\right)
 $$
 
-We can maximize (wrt $\beta$) by ignoring the first term and minimizing the
-second term. i.e. we minimize:
+Given that the $\epsilon_i$'s are independent, the likelihood of observing the entire dataset $\{y_i\}_{i=1}^n$ is the product of the individual probabilities:
 
 $$
-\argmin_\beta \left( \frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 + \frac{1}{2c}\sum_j^p\beta_j^2 \right)\\
-= \argmin_\beta \left( \frac{1}{2\sigma^2} \left( \sum_i^n \epsilon_i^2 + \frac{\sigma^2}{c}\sum_j^p\beta_j^2 \right) \right)
+L(\beta_0, \beta_1, ..., \beta_p, \sigma^2 | \{y_i\}_{i=1}^n) = \prod_{i=1}^n \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_i - \beta_0 - \sum_{j=1}^p x_{ij}\beta_j)^2}{2\sigma^2}\right)
 $$
 
-As above, if $RSS = \sum_i^n \epsilon_i^2$ and if we set $\lambda =
-\frac{\sigma^2}{c}$, we can see that the mode corresponds to ridge optimization.
+This likelihood function represents the probability of observing the data given the parameters $\beta_0, \beta_1, ..., \beta_p$, and $\sigma^2$. Maximizing this likelihood function with respect to the parameters is equivalent to minimizing the sum of squared residuals, which is the basis for ordinary least squares regression. In the context of Bayesian analysis, this likelihood is a key component in updating beliefs about the parameters after observing the data.
+
+
+> b. Assume the following prior for $\beta$: $\beta_1, ..., \beta_p$ are independent and identically distributed according to a double-exponential distribution with mean 0 and common scale parameter b: i.e. $p(\beta) = \frac{1}{2b}\exp(-|\beta|/b)$. Write out the posterior for $\beta$ in this setting.
+
+Given the prior for $\beta_j$ ($j = 1, ..., p$) as independent and identically distributed according to a double-exponential (Laplace) distribution with mean 0 and common scale parameter $b$, the prior density for each $\beta_j$ is:
+
+$$
+p(\beta_j) = \frac{1}{2b}\exp\left(-\frac{|\beta_j|}{b}\right)
+$$
+
+The joint prior for all $\beta = (\beta_1, ..., \beta_p)$ given their independence is the product of the individual priors:
+
+$$
+p(\beta) = \prod_{j=1}^p \frac{1}{2b}\exp\left(-\frac{|\beta_j|}{b}\right)
+$$
+
+Given the likelihood of the data $L(\beta_0, \beta_1, ..., \beta_p, \sigma^2 | \{y_i\}_{i=1}^n)$ from part (a), the posterior distribution for $\beta$ combines this likelihood with the prior distribution on $\beta$, according to Bayes' theorem:
+
+$$
+p(\beta | \{y_i\}_{i=1}^n) \propto L(\beta_0, \beta_1, ..., \beta_p, \sigma^2 | \{y_i\}_{i=1}^n) \times p(\beta)
+$$
+
+Substituting the expressions for the likelihood and the prior, we get:
+
+$$
+p(\beta | \{y_i\}_{i=1}^n) \propto \left(\prod_{i=1}^n \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_i - \beta_0 - \sum_{j=1}^p x_{ij}\beta_j)^2}{2\sigma^2}\right)\right) \times \left(\prod_{j=1}^p \frac{1}{2b}\exp\left(-\frac{|\beta_j|}{b}\right)\right)
+$$
+
+This expression represents the posterior distribution for $\beta$ in this setting, combining the likelihood of the observed data with the Laplace prior on the coefficients. The posterior distribution reflects our updated beliefs about the values of $\beta$ after observing the data, taking into account both the likelihood of the data given $\beta$ and the prior beliefs about $\beta$'s distribution. In practice, maximizing this posterior distribution with respect to $\beta$ (or equivalently, minimizing its negative log) leads to Lasso regression, where the double-exponential prior on the coefficients corresponds to the L1 penalty term.
+
+
+> c. Argue that the lasso estimate is the _mode_ for $\beta$ under this posterior distribution.
+
+Given the posterior distribution for $\beta$ in the setting where $\beta_j$ ($j = 1, ..., p$) have independent double-exponential (Laplace) priors with mean 0 and common scale parameter $b$, and combining this with the likelihood of observing the data under a normal error model, we have:
+
+$$
+p(\beta | \{y_i\}_{i=1}^n) \propto \left(\prod_{i=1}^n \exp\left(-\frac{(y_i - \beta_0 - \sum_{j=1}^p x_{ij}\beta_j)^2}{2\sigma^2}\right)\right) \times \left(\prod_{j=1}^p \exp\left(-\frac{|\beta_j|}{b}\right)\right)
+$$
+
+To argue that the lasso estimate is the mode for $\beta$ under this posterior distribution, consider the following:
+
+1. **Mode of the Posterior Distribution:** The mode of a distribution is the value that maximizes the distribution function. For the posterior distribution of $\beta$, the mode corresponds to the values of $\beta$ that maximize the posterior probability.
+
+2. **Negative Log-Posterior:** To find the mode, it is often easier to minimize the negative log of the posterior distribution, as the logarithm is a monotonic transformation that does not change the location of the maximum. The negative log-posterior, ignoring constants, is proportional to:
+
+   $$
+   \sum_{i=1}^n \frac{(y_i - \beta_0 - \sum_{j=1}^p x_{ij}\beta_j)^2}{2\sigma^2} + \sum_{j=1}^p \frac{|\beta_j|}{b}
+   $$
+
+3. **Connection to Lasso:** The expression above resembles the objective function of the lasso regression, where the first term is the residual sum of squares (RSS) and the second term is the L1 penalty on the coefficients $\beta_j$. The scale parameter $b$ in the Laplace prior is inversely related to the penalty parameter $\lambda$ in the lasso regression, with a larger $b$ corresponding to a smaller $\lambda$ and vice versa.
+
+4. **Lasso as Mode:** Since minimizing the negative log-posterior is equivalent to finding the mode of the posterior distribution, and this minimization problem is identical to the lasso objective function, the lasso estimate (the solution to the lasso minimization problem) corresponds to the mode of the posterior distribution of $\beta$ under the given model and priors.
+
+In summary, the lasso estimate can be seen as the mode of the posterior distribution for $\beta$ when the priors on $\beta_j$ are independent double-exponential distributions. This Bayesian interpretation provides a probabilistic foundation for the lasso as a mode-finding procedure in the context of linear regression with Laplace priors on the coefficients.
+
+> d. Now assume the following prior for $\beta$: $\beta_1, ..., \beta_p$ are independent and identically distributed according to a normal distribution  with mean zero and variance $c$. Write out the posterior for $\beta$ in this setting.
+
+Given the new assumption that $\beta_1, ..., \beta_p$ are independent and identically distributed according to a normal distribution with mean zero and variance $c$, the prior density for each $\beta_j$ is:
+
+$$
+p(\beta_j) = \frac{1}{\sqrt{2\pi c}}\exp\left(-\frac{\beta_j^2}{2c}\right)
+$$
+
+The joint prior for all $\beta = (\beta_1, ..., \beta_p)$ given their independence is the product of the individual priors:
+
+$$
+p(\beta) = \prod_{j=1}^p \frac{1}{\sqrt{2\pi c}}\exp\left(-\frac{\beta_j^2}{2c}\right)
+$$
+
+Given the likelihood of the data $L(\beta_0, \beta_1, ..., \beta_p, \sigma^2 | \{y_i\}_{i=1}^n)$ from part (a), the posterior distribution for $\beta$ combines this likelihood with the prior distribution on $\beta$, according to Bayes' theorem:
+
+$$
+p(\beta | \{y_i\}_{i=1}^n) \propto L(\beta_0, \beta_1, ..., \beta_p, \sigma^2 | \{y_i\}_{i=1}^n) \times p(\beta)
+$$
+
+Substituting the expressions for the likelihood and the prior, we get:
+
+$$
+p(\beta | \{y_i\}_{i=1}^n) \propto \left(\prod_{i=1}^n \exp\left(-\frac{(y_i - \beta_0 - \sum_{j=1}^p x_{ij}\beta_j)^2}{2\sigma^2}\right)\right) \times \left(\prod_{j=1}^p \exp\left(-\frac{\beta_j^2}{2c}\right)\right)
+$$
+
+Simplifying the expression by combining the exponential terms, we obtain:
+
+$$
+p(\beta | \{y_i\}_{i=1}^n) \propto \exp\left(-\sum_{i=1}^n \frac{(y_i - \beta_0 - \sum_{j=1}^p x_{ij}\beta_j)^2}{2\sigma^2} - \sum_{j=1}^p \frac{\beta_j^2}{2c}\right)
+$$
+
+This expression represents the posterior distribution for $\beta$ in this setting, combining the likelihood of the observed data with the Gaussian prior on the coefficients. The posterior distribution reflects our updated beliefs about the values of $\beta$ after observing the data, taking into account both the likelihood of the data given $\beta$ and the prior beliefs about $\beta$'s distribution. In practice, maximizing this posterior distribution with respect to $\beta$ (or equivalently, minimizing its negative log) leads to Ridge Regression, where the Gaussian prior on the coefficients corresponds to the L2 penalty term.
+
+
+> e. Argue that the ridge regression estimate is both the _mode_ and the _mean_ for $\beta$ under this posterior distribution.
+
+Given the posterior distribution for $\beta$ under the assumption that $\beta_1, ..., \beta_p$ are independent and identically distributed according to a normal distribution with mean zero and variance $c$, and combining this with the likelihood of observing the data under a normal error model, we have:
+
+$$
+p(\beta | \{y_i\}_{i=1}^n) \propto \exp\left(-\sum_{i=1}^n \frac{(y_i - \beta_0 - \sum_{j=1}^p x_{ij}\beta_j)^2}{2\sigma^2} - \sum_{j=1}^p \frac{\beta_j^2}{2c}\right)
+$$
+
+This posterior distribution is derived from a Gaussian likelihood and a Gaussian prior, which results in a Gaussian posterior due to the conjugacy between the Gaussian likelihood and the Gaussian prior in Bayesian analysis.
+
+1. **Mode of the Posterior Distribution:** The mode of a distribution is the value that maximizes the distribution function. For Gaussian distributions, the mode coincides with the mean. In the context of the posterior distribution for $\beta$, the mode is found by differentiating the negative log-posterior with respect to $\beta$ and setting it to zero. This process yields the ridge regression estimates, which minimize the penalized sum of squares:
+
+   $$
+   \sum_{i=1}^n (y_i - \beta_0 - \sum_{j=1}^p x_{ij}\beta_j)^2 + \lambda \sum_{j=1}^p \beta_j^2
+   $$
+
+   where $\lambda$ is a function of the variance parameters $\sigma^2$ and $c$.
+
+2. **Mean of the Posterior Distribution:** In Bayesian analysis, the mean of the posterior distribution is the expected value of the parameter given the data. For Gaussian distributions, the mean is a central measure that also represents the expected value of the distribution. Since the posterior distribution of $\beta$ is Gaussian (due to the conjugacy of the Gaussian likelihood and Gaussian prior), the mean of this distribution is given by the values of $\beta$ that minimize the negative log-posterior, which are the same values that define the mode.
+
+3. **Ridge Regression Estimate as Mode and Mean:** The ridge regression estimate, which minimizes the penalized sum of squares, corresponds to the mode of the posterior distribution because it is the value of $\beta$ that maximizes the posterior probability. Given the Gaussian nature of the posterior, this estimate also represents the mean of the distribution. This dual characterization as both the mode and the mean is a property of the Gaussian distribution and highlights the Bayesian connection to ridge regression: the ridge estimate can be interpreted as the most probable value of $\beta$ (mode) and the expected value of $\beta$ (mean) under the posterior distribution given the data and the Gaussian prior.
+
+In summary, the ridge regression estimate is both the mode and the mean for $\beta$ under the posterior distribution when the prior distribution of $\beta$ is Gaussian. This illustrates the deep connection between Bayesian inference and regularization techniques in regression analysis.
