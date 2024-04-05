@@ -1,407 +1,742 @@
-# ISLP Conceptual Exercise Questions
+# Resampling Methods
 
-## Question 1
- Proving the Equivalence of the Logistic Function and Logit Representation in Logistic Regression
+## Conceptual
 
+### Question 1
 
-#### Logistic Function Representation
+> Prove that $\alpha$ given by $$\alpha = \frac{\sigma^2_Y - \sigma_{XY}}{\sigma^2_X + \sigma^2_Y - 2\sigma_{XY}}$$ does indeed minimize $Var(\alpha X + (1 - \alpha)Y)$.
 
-The logistic function representation models the probability \(P(Y=1|X)\) that a given input \(X\) belongs to category 1 as follows:
 
-$$ P(Y=1|X) = \frac{1}{1 + e^{-(\beta_0 + \beta_1X_1 + ... + \beta_kX_k)}} $$
+Remember that: 
 
-#### Logit Representation
+$$
+Var(aX) = a^2Var(X), \\ 
+\mathrm{Var}(X + Y) = \mathrm{Var}(X) + \mathrm{Var}(Y) + 2\mathrm{Cov}(X,Y), \\
+\mathrm{Cov}(aX, bY) = ab\mathrm{Cov}(X, Y)
+$$
 
-The logit representation, on the other hand, expresses the log odds of the probability as a linear function of the predictors:
+If we define $\sigma^2_X = \mathrm{Var}(X)$, $\sigma^2_Y = \mathrm{Var}(Y)$ and
+$\sigma_{XY} = \mathrm{Cov}(X, Y)$
 
-$$ \log\left(\frac{P(Y=1|X)}{1 - P(Y=1|X)}\right) = \beta_0 + \beta_1X_1 + ... + \beta_kX_k $$
+\begin{align}
+Var(\alpha X + (1 - \alpha)Y) 
+  &= \alpha^2\sigma^2_X + (1-\alpha)^2\sigma^2_Y + 2\alpha(1 - \alpha)\sigma_{XY} \\
+  &= \alpha^2\sigma^2_X + \sigma^2_Y - 2\alpha\sigma^2_Y + \alpha^2\sigma^2_Y + 
+     2\alpha\sigma_{XY} - 2\alpha^2\sigma_{XY} 
+\end{align}
 
-#### Proof of Equivalence
+Now we want to find when the rate of change of this function is 0 with respect
+to $\alpha$, so we compute the partial derivative, set to 0 and solve.
 
-To prove the equivalence, we start with the logistic function representation and show that it can be transformed into the logit representation.
+$$
+\frac{\partial}{\partial{\alpha}} = 
+  2\alpha\sigma^2_X - 2\sigma^2_Y + 2\alpha\sigma^2_Y + 2\sigma_{XY} - 4\alpha\sigma_{XY} = 0
+$$
 
-Starting with the logistic function:
+Moving $\alpha$ terms to the same side:
 
-$$ P(Y=1|X) = \frac{1}{1 + e^{-(\beta_0 + \beta_1X_1 + ... + \beta_kX_k)}} $$
+$$
+\alpha\sigma^2_X + \alpha\sigma^2_Y - 2\alpha\sigma_{XY} = \sigma^2_Y - \sigma_{XY}
+$$
 
-Let's denote \(P(Y=1|X)\) as \(p\) for simplicity. Then, we have:
+$$
+\alpha = \frac{\sigma^2_Y - \sigma_{XY}}{\sigma^2_X + \sigma^2_Y - 2\sigma_{XY}}
+$$
 
-$$ p = \frac{1}{1 + e^{-(\beta_0 + \beta_1X_1 + ... + \beta_kX_k)}} $$
+We should also show that this is a minimum, so that the second partial 
+derivative wrt $\alpha$ is $>= 0$.
 
-Rearranging the equation to solve for \(e^{-(\beta_0 + \beta_1X_1 + ... + \beta_kX_k)}\), we get:
+\begin{align}
+\frac{\partial^2}{\partial{\alpha^2}} 
+  &=  2\sigma^2_X + 2\sigma^2_Y - 4\sigma_{XY} \\
+  &=  2(\sigma^2_X + \sigma^2_Y - 2\sigma_{XY}) \\
+  &= 2\mathrm{Var}(X - Y)
+\end{align}
 
-$$ e^{-(\beta_0 + \beta_1X_1 + ... + \beta_kX_k)} = \frac{1}{p} - 1 $$
+Since variance is positive, then this must be positive.
 
-Taking the natural logarithm of both sides gives us:
+### Question 2
 
-$$ -(\beta_0 + \beta_1X_1 + ... + \beta_kX_k) = \log\left(\frac{1}{p} - 1\right) $$
+> We will now derive the probability that a given observation is part of a bootstrap sample. Suppose that we obtain a bootstrap sample from a set of n observations.
+>
+> a. What is the probability that the first bootstrap observation is _not_ the
+>    $j$th observation from the original sample? Justify your answer.
 
-Multiplying both sides by -1 and rearranging, we obtain:
+The probability is $1 - 1/n$, since each observation has an equal chance of being selected.
 
-$$ \beta_0 + \beta_1X_1 + ... + \beta_kX_k = \log\left(\frac{p}{1-p}\right) $$
+> b. What is the probability that the second bootstrap observation is _not_ the $j$th observation from the original sample?
 
-This is the logit representation, which shows that the logistic function representation and the logit representation are indeed equivalent.
+Since each bootstrap observation is a random sample, this probability is the same ($1 - 1/n$).
 
-#### Conclusion
+> c. Argue that the probability that the $j$th observation is _not_ in the bootstrap sample is $(1 - 1/n)^n$.
 
-Through this proof, we have demonstrated that the logistic function representation and the logit representation in logistic regression are equivalent. This equivalence is fundamental to understanding how logistic regression models the relationship between the predictors and the binary outcome.
+For the $j$th observation to not be in the sample, it would have to _not_ be picked for each of $n$ positions, so not picked for $1, 2, ..., n$, thus the probability is $(1 - 1/n)^n$ 
 
-## Question 2
-#### Bayes Classifier and Discriminant Function Maximization
+> d. When $n = 5$, what is the probability that the $j$th observation is in the bootstrap sample?
 
-The Bayes classifier is a fundamental concept in statistical classification that assigns an observation to the class with the highest posterior probability, given the observation. When the observations in the \(k\)th class are assumed to be drawn from a normal distribution \(N(\mu_k, \sigma^2)\), with a common variance \(\sigma^2\) across classes but different means \(\mu_k\), the Bayes classifier can be shown to assign an observation to the class for which the discriminant function is maximized.
+```{r}
+n <- 5
+1 - (1 - 1 / n)^n
+```
 
-#### Assumptions
+$p = 0.67$
 
-- Observations in the \(k\)th class follow a normal distribution \(N(\mu_k, \sigma^2)\).
-- The prior probabilities of each class, \(P(Y=k)\), are known.
+> e. When $n = 100$, what is the probability that the $j$th observation is in the bootstrap sample?
 
-#### Discriminant Function for Normal Distribution
+```{r}
+n <- 100
+1 - (1 - 1 / n)^n
+```
 
-For a given class \(k\), the discriminant function \(g_k(x)\) based on the normal distribution assumptions is given by:
+$p = 0.64$
 
-$$ g_k(x) = -\frac{1}{2\sigma^2}(x - \mu_k)^2 + \log(P(Y=k)) $$
+> f. When $n = 10,000$, what is the probability that the $j$th observation is in the bootstrap sample?
 
-This function combines the log of the likelihood function of \(x\) given class \(k\) (assuming a normal distribution) and the log of the prior probability of class \(k\).
+```{r}
+n <- 100000
+1 - (1 - 1 / n)^n
+```
 
-#### Proof of Maximization
+$p = 0.63$
 
-To prove that the Bayes classifier assigns an observation \(x\) to the class for which \(g_k(x)\) is maximized, consider two classes \(j\) and \(k\) with discriminant functions \(g_j(x)\) and \(g_k(x)\) respectively. Without loss of generality, if \(g_k(x) > g_j(x)\) for an observation \(x\), then:
+> g. Create a plot that displays, for each integer value of $n$ from 1 to 100,000, the probability that the $j$th observation is in the bootstrap sample. Comment on what you observe.
 
-$$ -\frac{1}{2\sigma^2}(x - \mu_k)^2 + \log(P(Y=k)) > -\frac{1}{2\sigma^2}(x - \mu_j)^2 + \log(P(Y=j)) $$
+```{r}
+x <- sapply(1:100000, function(n) 1 - (1 - 1 / n)^n)
+plot(x, log = "x", type = "o")
+```
 
-Rearranging terms, we get:
+The probability rapidly approaches 0.63 with increasing $n$.
 
-$$ (x - \mu_k)^2 - (x - \mu_j)^2 + 2\sigma^2\log\left(\frac{P(Y=k)}{P(Y=j)}\right) < 0 $$
+Note that $$e^x = \lim_{x \to \inf} \left(1 + \frac{x}{n}\right)^n,$$ so with $x = -1$, we
+can see that our limit is $1 - e^{-1} = 1 - 1/e$.
 
-This inequality shows that the difference in squared distances of \(x\) from the means of the two classes, adjusted by the log ratio of their prior probabilities, is less than zero, indicating that \(x\) is closer to \(\mu_k\) than to \(\mu_j\) in a probabilistic sense, taking into account both the likelihood and the prior probability.
+> h. We will now investigate numerically the probability that a bootstrap sample of size $n = 100$ contains the $j$th observation. Here $j = 4$. We repeatedly create bootstrap samples, and each time we record whether or not the fourth observation is contained in the bootstrap sample.
+>    
+>    ```r
+>    > store <- rep (NA, 10000)
+>    > for (i in 1:10000) {
+>        store[i] <- sum(sample(1:100, rep = TRUE) == 4) > 0
+>    }
+>    > mean(store)
+>    ```
+>    
+>    Comment on the results obtained.
 
-#### Conclusion
+```{r}
+store <- replicate(10000, sum(sample(1:100, replace = TRUE) == 4) > 0)
+mean(store)
+```
 
-Therefore, under the assumption of normal distributions with equal variances and different means for each class, the Bayes classifier assigns an observation \(x\) to the class \(k\) for which the discriminant function \(g_k(x)\) is maximized. This maximization effectively combines information about the likelihood of \(x\) under each class distribution with the prior probabilities of each class, ensuring the optimal classification decision according to Bayes' theorem.
+The probability of including $4$ when resampling numbers $1...100$ is close to
+$1 - (1 - 1/100)^{100}$.
 
-## Question 3
+### Question 3
 
-This problem relates to the QDA model, in which the observations within each class are drawn from a normal distribution with a class-specific mean vector and a class specific covariance matrix. We consider the simple case where \(p = 1\); i.e. there is only one feature. Suppose that we have \(K\) classes, and that if an observation belongs to the \(kth\) class then \(X\) comes from a one-dimensional normal distribution, \(X \sim N(\mu_k, \sigma^2_k)\). Recall that the density function for the one-dimensional normal distribution is given in (4.16). Prove that in this case, the Bayes classifier is not linear. Argue that it is in fact quadratic.
-   - *Hint:* For this problem, you should follow the arguments laid out in Section 4.4.1, but without making the assumption that \(\sigma^2_1 = \dots = \sigma^2_K\).
+> 3. We now review $k$-fold cross-validation.
+>
+> a. Explain how $k$-fold cross-validation is implemented.
 
-## Answer 3
+Divide the dataset into $k$ segments, or folds. Train the model on $k-1$ folds and test it on the remaining fold. Repeat this $k$ times, each time with a different fold as the test set, and average the test scores.
 
-Given \(K\) classes, with each class \(k\) having observations drawn from \(X \sim N(\mu_k, \sigma^2_k)\), prove that the Bayes classifier, in this case, is not linear but quadratic.
 
-#### Density Function for One-Dimensional Normal Distribution
+> b. What are the advantages and disadvantages of $k$-fold cross-validation
+>    relative to:
+>    i. The validation set approach?
+>    ii. LOOCV?
 
-The density function for a one-dimensional normal distribution, given \(X \sim N(\mu, \sigma^2)\), is:
+- **Compared to the Validation Set Approach:**
+  - Advantages: More reliable estimate of model performance.
+  - Disadvantages: More computationally intensive.
+- **Compared to LOOCV:**
+  - Advantages: Less computationally intensive for large datasets.
+  - Disadvantages: Might introduce bias if $k$ is too small.
 
-$$ f(x|\mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right) $$
+### Question 4
 
-#### Bayes Classifier in QDA
+> Suppose that we use some statistical learning method to make a prediction for the response $Y$ for a particular value of the predictor $X$. Carefully describe how we might estimate the standard deviation of our prediction.
 
-The Bayes classifier assigns an observation \(x\) to the class that maximizes the posterior probability. For QDA, the discriminant function for class \(k\) is derived from the log of the posterior probability, which includes the log of the above density function:
 
-$$ g_k(x) = \log\left(\frac{1}{\sqrt{2\pi\sigma^2_k}}\right) - \frac{(x-\mu_k)^2}{2\sigma^2_k} + \log(\pi_k) $$
+Use the bootstrap method to estimate the standard deviation of a prediction for a particular value of $X$. This involves sampling from the dataset with replacement, fitting the model, and predicting for $X$ multiple times. The standard deviation of these predictions estimates the standard deviation of the original prediction.
 
-where \(\pi_k\) is the prior probability of class \(k\).
 
-#### Proof of Quadratic Classifier
 
-Expanding \(g_k(x)\), we notice the term \(-\frac{(x-\mu_k)^2}{2\sigma^2_k}\) introduces a quadratic component in \(x\). Unlike in Linear Discriminant Analysis (LDA), where the assumption is that all classes share the same covariance (\(\sigma^2\)), leading to linear functions of \(x\), the class-specific \(\sigma^2_k\) in QDA results in each class having its unique quadratic term in the discriminant function.
+# Linear Model Selection and Regularization
 
-The Bayes classifier assigns an observation \(x\) to the class \(k\) that maximizes the posterior probability \(P(Y=k|X=x)\), which can be expressed using Bayes' theorem as:
+## Conceptual
 
-$$ P(Y=k|X=x) = \frac{f_k(x) \pi_k}{\sum_{l=1}^{K} f_l(x) \pi_l} $$
+### Question 1
 
-where \(f_k(x)\) is the density function of \(X\) in class \(k\), and \(\pi_k\) is the prior probability of class \(k\).
+> We perform best subset, forward stepwise, and backward stepwise selection on a single data set. For each approach, we obtain $p + 1$ models, containing $0, 1, 2, ..., p$ predictors. Explain your answers:
+>
+> a. Which of the three models with $k$ predictors has the smallest *training* RSS?
 
-\
-Given \(X \sim N(\mu_k, \sigma^2_k)\), the density function is:
+The model with $k$ predictors that has the smallest *training* Residual Sum of Squares (RSS) is typically obtained through **best subset selection**. Here's why:
 
-$$ f_k(x) = \frac{1}{\sqrt{2\pi\sigma^2_k}} \exp\left(-\frac{(x-\mu_k)^2}{2\sigma^2_k}\right) $$
+- **Best Subset Selection** systematically searches for the best model by considering all possible subsets of the predictors. This means it evaluates all combinations of predictors of size $k$ and selects the model that has the lowest RSS on the training data. Because it exhaustively searches all possible models, it is guaranteed to find the model with the lowest RSS for a given number of predictors $k$.
 
+- **Forward Stepwise Selection** starts with no predictors and sequentially adds the predictor that provides the most significant improvement to the model. While this approach is computationally more efficient than best subset selection, it does not evaluate all possible models of size $k$. Therefore, it might miss the model that minimally reduces the RSS for a given $k$.
 
-The discriminant function for class \(k\) in QDA, derived from the log of the posterior probability, is:
+- **Backward Stepwise Selection** starts with all predictors and sequentially removes the least significant predictor at each step. Similar to forward stepwise selection, it does not consider all possible subsets of size $k$, potentially overlooking the optimal model with the lowest RSS for a given number of predictors $k$.
 
-$$ g_k(x) = \log(f_k(x)) + \log(\pi_k) $$
+In summary, **best subset selection** is the method that, for any given $k$, is most likely to yield the model with the smallest training RSS because it evaluates all possible combinations of $k$ predictors.
 
-Substituting \(f_k(x)\) into \(g_k(x)\) gives:
 
-$$ g_k(x) = \log\left(\frac{1}{\sqrt{2\pi\sigma^2_k}}\right) - \frac{(x-\mu_k)^2}{2\sigma^2_k} + \log(\pi_k) $$
+> b. Which of the three models with $k$ predictors has the smallest *test* RSS?
 
+The model with $k$ predictors that has the smallest *test* Residual Sum of Squares (RSS) cannot be determined a priori to consistently be best subset, forward stepwise, or backward stepwise selection. The reason is that the performance of these models on test data depends on various factors, including the dataset's characteristics and the specific predictors involved. Here's a brief overview of how each method might perform in terms of test RSS:
 
-Focusing on the term that involves \(x\), we have:
+- **Best Subset Selection** might overfit the training data, especially for larger $k$, because it selects the model that fits the training data best among all possible subsets of predictors. While this approach is exhaustive and can potentially find the model with the lowest training RSS, it does not guarantee that this model will also have the lowest test RSS due to overfitting.
 
-$$ -\frac{(x-\mu_k)^2}{2\sigma^2_k} $$
+- **Forward Stepwise Selection** and **Backward Stepwise Selection** are more constrained in their search for models, which might help in preventing overfitting to some extent. By adding or removing one predictor at a time based on its contribution to the model's performance, these methods might inadvertently select a model that generalizes better to unseen data, potentially leading to a lower test RSS compared to the best subset selection in some cases.
 
-This is a quadratic expression in \(x\), as it includes the term \((x-\mu_k)^2\), which is the square of \(x\) minus the mean \(\mu_k\), divided by the class-specific variance \(\sigma^2_k\).
+- The effectiveness of **Regularization** (not mentioned in the original question but relevant for comparison) techniques like Lasso or Ridge Regression in reducing test RSS highlights the importance of balancing model complexity and training data fit. These methods penalize the inclusion of less significant predictors and can often result in models that generalize better than those selected purely based on training RSS.
 
-Since this quadratic term is present in the discriminant function \(g_k(x)\) for each class \(k\), and since the decision rule involves selecting the class \(k\) that maximizes \(g_k(x)\), the Bayes classifier in this context is inherently quadratic.
+In practice, the model with the smallest test RSS is determined empirically through cross-validation or a similar approach that evaluates model performance on unseen data. It's also important to note that minimizing test RSS is not the only criterion for model selection; interpretability and the underlying assumptions about the data and model should also be considered.
 
 
-Therefore, the discriminant function \(g_k(x)\) for each class \(k\) is a quadratic function of \(x\), not a linear function. This quadratic nature arises from the \((x-\mu_k)^2\) term divided by \(\sigma^2_k\), which cannot be simplified into a linear form due to the variance being class-specific (\(\sigma^2_k\)).
 
-#### Conclusion
+> c. True or False:
+>    i. The predictors in the $k$-variable model identified by forward stepwise are a subset of the predictors in the ($k+1$)-variable model identified by forward stepwise selection.
 
-In the case of QDA with one feature and class-specific means and variances, the Bayes classifier is inherently quadratic. This is due to the quadratic term in the discriminant function arising from the class-specific variances, making the decision boundaries between classes quadratic rather than linear. This quadratic decision boundary allows for more flexible classification that can capture the nuances of each class's distribution more accurately than a linear classifier.
+Yes, the statement is true. In forward stepwise selection, the method starts with no predictors and sequentially adds one predictor at a time that most improves the model according to a specified criterion (usually a reduction in RSS or an improvement in R-squared).
 
-## Question 4
-When the number of features \(p\) is large, there tends to be a deterioration in the performance of KNN and other local approaches that perform prediction using only observations that are near the test observation for which a prediction must be made. This phenomenon is known as the curse of dimensionality, and it ties into the fact that non-parametric approaches often perform poorly when \(p\) is large. We will now investigate this curse.
+Therefore, by design:
 
-### (a)
+- The model with $k$ predictors, identified through forward stepwise selection, will contain a specific set of $k$ predictors.
+- When moving to a $k+1$ model, forward stepwise selection adds one more predictor to the existing $k$ predictors, making the $k+1$ model include all the predictors from the $k$-predictor model plus one additional predictor.
 
-Suppose that we have a set of observations, each with measurements on \(p = 1\) feature, \(X\). We assume that \(X\) is uniformly (evenly) distributed on \([0, 1]\). Associated with each observation is a response value. Suppose that we wish to predict a test observation’s response using only observations that are within 10% of the range of \(X\) closest to that test observation. For instance, in order to predict the response for a test observation with \(X = 0.6\), we will use observations in the range \([0.55, 0.65]\). On average, what fraction of the available observations will we use to make the prediction?
+This process ensures that the predictors in the $k$-variable model are always a subset of the predictors in the $(k+1)$-variable model identified by forward stepwise selection.
 
-### (b)
 
-Now suppose that we have a set of observations, each with measurements on \(p = 2\) features, \(X_1\) and \(X_2\). We assume that \((X_1, X_2)\) are uniformly distributed on \([0, 1] \times [0, 1]\). We wish to predict a test observation’s response using only observations that are within 10% of the range of \(X_1\) and within 10% of the range of \(X_2\) closest to that test observation. For instance, in order to predict the response for a test observation with \(X_1 = 0.6\) and \(X_2 = 0.35\), we will use observations in the range \([0.55, 0.65]\) for \(X_1\) and in the range \([0.3, 0.4]\) for \(X_2\). On average, what fraction of the available observations will we use to make the prediction?
+>    ii. The predictors in the $k$-variable model identified by backward stepwise are a subset of the predictors in the $(k+1)$-variable model identified by backward stepwise selection.
 
-### (c)
+Actually, the statement should be reversed for clarity and accuracy. In backward stepwise selection, the method starts with all predictors and sequentially removes the least significant predictor at each step. Therefore:
 
-Suppose we have a set of observations on \(p = 100\) features, with each feature uniformly distributed from 0 to 1. To predict a test observation's response, we use observations within the 10% of each feature's range closest to the test observation. 
+- The model with $(k+1)$ predictors, identified through backward stepwise selection, will contain a specific set of $(k+1)$ predictors.
+- When moving to a $k$ model by removing one predictor, the $k$-variable model will include all the predictors from the $(k+1)$-predictor model except the one that was removed.
 
+This means that the predictors in the $k$-variable model are indeed a subset of the predictors in the $(k+1)$-variable model identified by backward stepwise selection, but the direction of selection (from all predictors down to fewer) is the opposite of forward stepwise selection.
 
-### (d)
 
-Using the answers from parts (a)–(c), we can argue that a significant drawback of KNN (K-Nearest Neighbors) when \(p\) is large is the sparsity of the data in high-dimensional space. As \(p\) increases, the fraction of observations considered "near" any given test observation decreases exponentially, making it challenging to find a sufficient number of close neighbors for reliable prediction.
+>    iii. The predictors in the $k$-variable model identified by backward stepwise are a subset of the predictors in the $(k+1)$-variable model identified by forward stepwise selection.
 
-### (e)
 
-Suppose we wish to make a prediction for a test observation by creating a \(p\)-dimensional hypercube centered around the test observation that contains, on average, 10% of the training observations. 
+The statement is generally **false**. The relationship between the predictors in the $k$-variable model identified by backward stepwise selection and the predictors in the $(k+1)$-variable model identified by forward stepwise selection is not as straightforward as being subsets of one another. Here's why:
 
+- **Backward Stepwise Selection** starts with all available predictors and sequentially removes the least significant predictor based on a certain criterion (like p-value, AIC, BIC, or RSS) until $k$ predictors remain. The selection of predictors to remove at each step is based on the model's performance with all the current predictors.
 
+- **Forward Stepwise Selection** begins with no predictors and adds one predictor at a time that most improves the model based on the same or similar criteria until $k+1$ predictors are included. The selection of predictors to add at each step depends on the model's performance with the currently included predictors.
 
-### Answer 4(a)
+Because these two methods start from opposite ends (all predictors vs. no predictors) and follow different paths through the predictor space (removing vs. adding), the set of predictors in a model identified by backward stepwise selection is not necessarily a subset of the predictors in a model identified by forward stepwise selection, especially when comparing models with different numbers of predictors ($k$ vs. $k+1$).
 
-Given that \(X\) is uniformly distributed on \([0, 1]\), every portion of the range \([0, 1]\) has an equal probability of containing any observation. When we consider using only observations within 10% of the range of \(X\) closest to a test observation, we are essentially selecting a sub-range of \([0, 1]\) that spans 10% of the total range.
+The predictors selected at each step are contingent upon the predictors already in the model and how they interact with the remaining predictors not yet chosen (in the case of forward selection) or those being considered for removal (in the case of backward selection). Therefore, the specific predictors in a model of size $k$ identified by one method are not guaranteed to be a subset of those in a model of size $k+1$ identified by the other method.
 
-For a test observation with \(X = 0.6\), as given in the example, the range used for prediction is \([0.55, 0.65]\), which is indeed 10% of the total range. This is because \(0.65 - 0.55 = 0.1\), and \(0.1/1 = 0.1\) or 10%.
 
-Therefore, regardless of the specific value of \(X\) for the test observation, when we use observations within 10% of the range of \(X\) closest to that test observation, **on average, we will use 10% of the available observations** to make the prediction. This is due to the uniform distribution of \(X\) across the interval \([0, 1]\) and the consistent application of a 10% sub-range for prediction.
+>    iv. The predictors in the $k$-variable model identified by forward stepwise are a subset of the predictors in the $(k+1)$-variable model identified by backward stepwise selection.
 
+This statement is **generally false** for similar reasons as the previous one. The relationship between the predictors in the $k$-variable model identified by forward stepwise selection and the predictors in the $(k+1)$-variable model identified by backward stepwise selection does not inherently ensure that one set of predictors is a subset of the other. 
 
-### Answer 4(b)
+>    v. The predictors in the $k$-variable model identified by best subset are a subset of the predictors in the $(k+1)$-variable model identified by best subset selection.
 
-Given that \((X_1, X_2)\) are uniformly distributed on \([0, 1] \times [0, 1]\), every portion of this two-dimensional space has an equal probability of containing any observation. When we consider using only observations within 10% of the range of \(X_1\) and \(X_2\) closest to a test observation, we are essentially selecting a sub-rectangle of \([0, 1] \times [0, 1]\) that spans 10% of the total range for both \(X_1\) and \(X_2\).
+This statement is **false**. Best subset selection operates differently from both forward stepwise and backward stepwise selection. Here's the key distinction:
 
-For a test observation with \(X_1 = 0.6\) and \(X_2 = 0.35\), as given in the example, the ranges used for prediction are \([0.55, 0.65]\) for \(X_1\) and \([0.3, 0.4]\) for \(X_2\), each spanning 10% of their respective total ranges. The area of the sub-rectangle used for prediction in the two-dimensional feature space is the product of the lengths of the sides corresponding to each feature's range:
+- **Best Subset Selection** evaluates all possible combinations of predictors for each model size, from 0 predictors up to the maximum number of available predictors, $p$. For each model size $k$, it selects the combination of $k$ predictors that results in the best model according to a chosen criterion (like lowest RSS, highest $R^2$, etc.).
 
-$$ \text{Area used for prediction} = 0.1 \times 0.1 = 0.01 $$
+Given this approach:
 
-This area represents 1% of the total area of the feature space \([0, 1] \times [0, 1]\), which has an area of 1. Therefore, **on average, we will use 1% of the available observations** to make the prediction. This is due to the uniform distribution of \((X_1, X_2)\) across the two-dimensional interval \([0, 1] \times [0, 1]\) and the consistent application of a 10% sub-range for each feature for prediction.
+1. **Independent Selection for Each Model Size:** The best subset of $k$ predictors is chosen independently of the best subset of $k+1$ predictors. The selection process for each model size does not build upon or reduce from the selection of another model size. Instead, it independently evaluates all combinations of predictors for that specific model size.
 
-### Answer 4(c):
+2. **No Guaranteed Subset Relationship:** Because each model size is considered independently, the set of $k$ predictors in the best model identified by best subset selection is not guaranteed to be a subset of the $k+1$ predictors in the best model for $k+1$ predictors. The best $k$-predictor model could have a completely different set of predictors than the best $k+1$-predictor model, depending on which combinations yield the optimal criterion value for each model size.
 
-For each feature, we use 10% of the range, similar to the previous cases. With \(p = 100\) features, the fraction of the available observations used to make the prediction is the product of the fractions for each feature:
+In summary, the predictors in a $k$-variable model identified by best subset selection are not necessarily a subset of the predictors in a $(k+1)$-variable model identified by best subset selection, due to the independent evaluation and selection process for each model size.
 
-$$ \text{Fraction used} = 0.1^{100} $$
 
-This results in a very small fraction, indicating that a minuscule portion of the observations will be used for the prediction.
+### Question 2
 
+> For parts (a) through (c), indicate which of i. through iv. is correct.
+> Justify your answer.
+>
+> a. The lasso, relative to least squares, is:
+>    i. More flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in variance.
+>    ii. More flexible and hence will give improved prediction accuracy when its increase in variance is less than its decrease in bias.
+>    iii. Less flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in variance.
+>    iv. Less flexible and hence will give improved prediction accuracy when its increase in variance is less than its decrease in bias.
 
-### Answer 4(d):
+For part (a), the correct statement is:
 
-To contain, on average, 10% of the training observations in a \(p\)-dimensional hypercube, the length of each side of the hypercube (\(L\)) can be found from:
+iii. Less flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in variance.
 
-$$ 0.1 = L^p $$
+**Justification:**
 
-Solving for \(L\) gives:
+- The Lasso (Least Absolute Shrinkage and Selection Operator) is a regularization technique that adds a penalty equal to the absolute value of the magnitude of coefficients to the loss function. This constraint makes the Lasso less flexible compared to ordinary least squares regression, which does not impose any restrictions on the coefficients and can fit the data as closely as possible (at the risk of overfitting).
 
-$$ L = 0.1^{1/p} $$
+- The primary effect of reducing model flexibility through regularization (like Lasso) is to increase bias but decrease variance. The rationale is that by constraining the model (e.g., by shrinking coefficients toward zero), we're deliberately introducing some bias (the model will not fit the training data as closely). However, this trade-off is beneficial when it leads to a significant reduction in variance, as it can improve the model's performance on unseen data by preventing overfitting.
 
-For \(p = 1\), \(p = 2\), and \(p = 100\):
+- Therefore, the Lasso can give improved prediction accuracy over least squares when the increase in bias (due to its constraints on the model's flexibility) is more than offset by a decrease in variance, leading to better generalization to new data. This aligns with statement iii, which correctly identifies the Lasso as being less flexible and potentially improving prediction accuracy when the trade-off between increased bias and decreased variance is favorable.
 
-- \(p = 1\): \(L = 0.1^{1/1} = 0.1\)
-- \(p = 2\): \(L = 0.1^{1/2} \approx 0.316\)
-- \(p = 100\): \(L = 0.1^{1/100} \approx 0.977\)
 
+> b. Repeat (a) for ridge regression relative to least squares.
 
-### Answer 4(e):
+For part (b), the correct statement is the same as for the Lasso:
 
-As \(p\) increases, the length of each side of the hypercube needed to encompass, on average, 10% of the observations approaches 1. This illustrates the "curse of dimensionality," where to capture a fixed fraction of the data in high-dimensional space, the size of the region grows significantly, making local methods like KNN less effective due to the vast volume of space that needs to be considered.
+iii. Less flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in variance.
 
-## Questions 5
+**Justification:**
 
-### (a) 
-If the Bayes decision boundary is linear, do we expect LDA or QDA to perform better on the training set? On the test set?
+- Ridge Regression, like Lasso, is a regularization technique. However, instead of adding a penalty equal to the absolute value of the coefficients (L1 penalty), Ridge Regression adds a penalty equal to the square of the magnitude of coefficients (L2 penalty) to the loss function. This penalty term discourages large coefficients by penalizing them more heavily than smaller ones, leading to a more constrained and hence less flexible model compared to ordinary least squares regression.
 
-### (b) 
-If the Bayes decision boundary is non-linear, do we expect LDA or QDA to perform better on the training set? On the test set?
+- The effect of this regularization is to reduce the variance of the model's predictions at the cost of introducing some bias. By shrinking the coefficients towards zero (but not exactly to zero, as Lasso can), Ridge Regression makes the model less sensitive to the training data, which can help in reducing overfitting and improving the model's performance on unseen data.
 
-### (c)
-In general, as the sample size \(n\) increases, do we expect the test prediction accuracy of QDA relative to LDA to improve, decline, or be unchanged? Why?
+- The key to improved prediction accuracy with Ridge Regression, relative to least squares, lies in the trade-off between bias and variance. When the increase in bias (due to the model being less flexible and not fitting the training data as closely) is outweighed by the decrease in variance (resulting in more stable and generalizable predictions), Ridge Regression can outperform least squares.
 
-### (d)
-True or False: Even if the Bayes decision boundary for a given problem is linear, we will probably achieve a superior test error rate using QDA rather than LDA because QDA is flexible enough to model a linear decision boundary. Justify your answer.
+- Therefore, statement iii accurately describes the scenario under which Ridge Regression would provide improved prediction accuracy relative to least squares: when its increase in bias is less than its decrease in variance, leading to a net improvement in model performance on new data.
 
-## Answers
 
-### (a) Linear Bayes Decision Boundary
-- **Training Set**: LDA is expected to perform better on the training set when the Bayes decision boundary is linear, due to its design for linear decision boundaries.
-- **Test Set**: LDA is also expected to perform better on the test set in this scenario, as its simplicity helps in better generalization.
+> c. Repeat (a) for non-linear methods relative to least squares.
 
-### (b) Non-linear Bayes Decision Boundary
-- **Training Set**: QDA should perform better on the training set if the Bayes decision boundary is non-linear, thanks to its ability to model more complex relationships.
-- **Test Set**: The performance of QDA on the test set can vary. While it may capture the boundary's complexity better, it also risks overfitting, potentially leading to worse generalization compared to LDA.
+For part (c), the correct statement is:
 
-### (c) Sample Size Increase
-As the sample size \(n\) increases, the test prediction accuracy of QDA relative to LDA is expected to improve. More data reduces the overfitting risk associated with QDA's greater flexibility, allowing it to more accurately model complex decision boundaries.
+i. More flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in variance.
 
-### (d) Linear Bayes Decision Boundary and Superior Test Error Rate
-- **Statement**: False.
-- **Justification**: Despite QDA's flexibility, its tendency to overfit makes LDA more likely to achieve a superior test error rate when the true decision boundary is linear. LDA's simplicity and alignment with the linear boundary typically result in better generalization.
+**Justification:**
 
-## Questions 6
+- Non-linear methods, by definition, are more flexible than linear methods like least squares regression. This increased flexibility comes from the non-linear methods' ability to capture complex relationships and patterns in the data that linear models cannot. Examples of non-linear methods include decision trees, neural networks, and kernel-based methods.
 
-Given the scenario where a dataset is split into equally-sized training and test sets, and two classification methods are applied with the following outcomes:
+- The primary characteristic of more flexible models is their ability to reduce bias by fitting the training data more closely. However, this comes at the potential cost of increasing variance, as highly flexible models can become too tailored to the training data, capturing noise as if it were signal, which can lead to overfitting.
 
-1. **Logistic Regression** yields:
-   - A 20% error rate on the training data.
-   - A 30% error rate on the test data.
-2. **1-Nearest Neighbors (K=1)** results in:
-   - An average error rate of 18% across both the training and test datasets.
+- The statement i suggests that non-linear methods will give improved prediction accuracy over least squares when they can achieve a significant reduction in bias without a corresponding large increase in variance. This is because the key to effective modeling is finding the right balance between bias and variance, known as the bias-variance tradeoff. 
 
-## Answer 6
+- For non-linear methods to outperform least squares in terms of prediction accuracy, they must be able to capture the underlying patterns in the data more accurately than a linear model (thereby reducing bias), without overfitting to the noise in the training data (thereby controlling the increase in variance). When the decrease in bias outweighs the increase in variance, non-linear methods can provide superior prediction accuracy on new, unseen data.
 
-To decide which method to prefer for classifying new observations, consider the following:
+- It's important to note that while non-linear methods have the potential to significantly improve prediction accuracy due to their flexibility, their performance heavily depends on the specific data set and how well the method is tuned (e.g., parameters, model complexity). Proper model selection, regularization, and validation are crucial to harnessing the benefits of non-linear methods while mitigating the risks of overfitting.
 
-- **Generalization to New Data**: The primary goal is to select a model that generalizes well to unseen data, which is best evaluated by the test error rate.
-- **Logistic Regression**: Shows a 10% increase in error rate from training to test, indicating some overfitting but providing a clear benchmark for its performance on unseen data.
-- **1-Nearest Neighbors (K=1)**: While the average error rate is lower at 18%, this metric combines the training and test error rates. Given that 1-NN typically has a very low error rate on the training set (potentially 0% because each point is its nearest neighbor), the test error rate is likely significantly higher than 18%.
 
-#### Conclusion
+### Question 3
 
-- **Preference**: Based on the provided information, **logistic regression** might be the preferred method for classifying new observations. This preference is due to its explicit test error rate, which, despite being higher, offers a clearer expectation of performance on new data compared to the potentially misleading average error rate of 1-NN.
-- **Rationale**: The decision leans towards logistic regression because it provides specific insights into how the model performs on unseen data, which is crucial for evaluating its generalization capability. The average error rate for 1-NN obscures its likely higher test error rate, making logistic regression the safer choice for new observations.
+> Suppose we estimate the regression coefficients in a linear regression model
+> by minimizing:
+>
+> $$
+> \sum_{i=1}^n\left(y_i - \beta_0 - \sum_{j=1}^p\beta_jx_{ij}\right)^2
+>   \textrm{subject to} \sum_{j=1}^p|\beta_j| \le s
+> $$
+>
+> for a particular value of $s$. For parts (a) through (e), indicate which of i. through v. is correct. Justify your answer.
+>
+> a. As we increase $s$ from 0, the training RSS will:
+>    i. Increase initially, and then eventually start decreasing in an inverted U shape.
+>    ii. Decrease initially, and then eventually start increasing in a U shape.
+>    iii. Steadily increase.
+>    iv. Steadily decrease.
+>    v. Remain constant.
 
+For part (a), the correct statement is:
 
-## Questions 7
+iv. Steadily decrease.
 
-Suppose you wish to classify an observation \(X \in \mathbb{R}\) into apples and oranges. You fit a logistic regression model and find that:
+**Justification:**
 
-$$ \Pr(Y = \text{orange} | X = x) = \frac{\exp(\hat{\beta}_0 + \hat{\beta}_1x)}{1 + \exp(\hat{\beta}_0 + \hat{\beta}_1x)} $$
+- The given constraint, $\sum_{j=1}^p|\beta_j| \le s$, is characteristic of Lasso regression, which imposes an L1 penalty on the coefficients of the regression model. The parameter $s$ controls the strength of the penalty; as $s$ increases, the constraint becomes less restrictive, allowing the absolute values of the coefficients $\beta_j$ to increase.
 
-Your friend fits a logistic regression model to the same data using the softmax formulation, and finds that:
+- When $s = 0$, the constraint is most restrictive, forcing all coefficients $\beta_j$ to be zero (except for the intercept $\beta_0$, which is not subject to the sum constraint). This results in the simplest model, which is likely to have high bias and high training RSS.
 
-$$ \Pr(Y = \text{orange} | X = x) = \frac{\exp(\hat{\alpha}_{\text{orange}0} + \hat{\alpha}_{\text{orange}1}x)}{\exp(\hat{\alpha}_{\text{orange}0} + \hat{\alpha}_{\text{orange}1}x) + \exp(\hat{\alpha}_{\text{apple}0} + \hat{\alpha}_{\text{apple}1}x)} $$
+- As $s$ increases from 0, the constraint on the sum of the absolute values of the coefficients becomes less restrictive, allowing some or all of the $\beta_j$ coefficients to move away from zero. This enables the model to fit the training data more closely, thereby reducing the training RSS.
 
+- Therefore, as $s$ increases, the model becomes more flexible, capable of capturing more complex relationships in the data, which leads to a steady decrease in training RSS. The training RSS decreases because the model is allowed to fit the data more closely as the penalty becomes less severe with increasing $s$.
 
-### (a) 
-What is the log odds of orange versus apple in your model?
 
-### (b) 
-What is the log odds of orange versus apple in your friend’s model?
 
-### (c) 
-Suppose that in your model, \(\hat{\beta}_0 = 2\) and \(\hat{\beta}_1 = -1\). What are the coefficient estimates in your friend’s model? Be as specific as possible.
+> b. Repeat (a) for test RSS.
 
-### (d) 
-Now suppose that you and your friend fit the same two models on a different data set. This time, your friend gets the coefficient estimates \(\hat{\alpha}_{\text{orange}0} = 1.2\), \(\hat{\alpha}_{\text{orange}1} = -2\), \(\hat{\alpha}_{\text{apple}0} = 3\), \(\hat{\alpha}_{\text{apple}1} = 0.6\). What are the coefficient estimates in your model?
+ii.
 
-### (e) 
-Finally, suppose you apply both models from (d) to a data set with 2,000 test observations. What fraction of the time do you expect the predicted class labels from your model to agree with those from your friend’s model? Explain your answer.
+**Conceptual Explanation:**
 
-## Answer 7
+- As $s$ increases from 0, the constraint on the coefficients becomes less restrictive, allowing the model to become more complex and fit the training data more closely. Initially, this reduction in bias leads to an improvement in test RSS due to better model generalization.
 
-### (a) 
+- At some point, as $s$ continues to increase, the model may start to overfit the training data, capturing noise as if it were a true signal. This overfitting results in an increase in variance, which can harm the model's performance on unseen test data, leading to an increase in test RSS.
 
-The log odds of orange versus apple in the logistic regression model is given by:
+- Therefore, the behavior of test RSS as $s$ increases is characterized by an initial decrease as the model better captures the underlying data structure, followed by a potential increase as overfitting becomes more pronounced. This pattern suggests a U-shaped relationship between test RSS and $s$, where there is an optimal level of $s$ that minimizes test RSS before it starts to increase due to overfitting.
 
-$$ \log\left(\frac{\Pr(Y = \text{orange} | X = x)}{\Pr(Y = \text{apple} | X = x)}\right) = \hat{\beta}_0 + \hat{\beta}_1x $$
 
-### (b) 
+> c. Repeat (a) for variance.
 
-In the softmax formulation, the log odds of orange versus apple is:
+For part (c), the correct statement is:
 
-$$ \log\left(\frac{\Pr(Y = \text{orange} | X = x)}{\Pr(Y = \text{apple} | X = x)}\right) = (\hat{\alpha}_{\text{orange}0} - \hat{\alpha}_{\text{apple}0}) + (\hat{\alpha}_{\text{orange}1} - \hat{\alpha}_{\text{apple}1})x $$
+iii.
 
-### (c) 
+**Justification:**
 
-Given \(\hat{\beta}_0 = 2\) and \(\hat{\beta}_1 = -1\), we can say that in our friend's model $\hat\alpha_{orange0} -
-\hat\alpha_{apple0} = 2$ and $\hat\alpha_{orange1} - \hat\alpha_{apple1} = -1$. 
+The variance of the model's predictions is directly related to the model's complexity. As $s$ increases, the constraint on the sum of the absolute values of the coefficients $\sum_{j=1}^p|\beta_j| \le s$ becomes less restrictive, allowing the model to become more complex by letting the coefficients $\beta_j$ move away from zero. This increase in model complexity typically leads to an increase in variance because the model becomes more sensitive to fluctuations in the training data.
 
-### (d) 
 
-The coefficients in our model would be $\hat\beta_0 = 1.2 - 3 = -1.8$ and
-$\hat\beta_1 = -2 - 0.6 = -2.6$
+> d. Repeat (a) for (squared) bias.
 
-### (e)
+For part (d), the correct statement is:
 
-Since both models are fitted to classify observations into the same categories and the softmax function is a generalization of logistic regression for multiple classes, the models should theoretically agree on classifications whenever the decision boundary is effectively linear. However, without knowing the specific decision boundary shapes derived from the coefficients in each model, it's challenging to predict the exact fraction of agreement. In practice, if both models capture the underlying data distribution accurately and similarly, the agreement could be high.
+iv. As $s$ increases, the model becomes more flexible so bias will decrease.
 
+Given the usual relationship between model complexity and bias, and considering the regularization context provided, the squared bias is expected to decrease as $s$ increases from 0. This decrease occurs because allowing the coefficients more freedom (less penalty) enables the model to better capture the underlying data patterns, thus reducing the error due to overly simplistic assumptions (high bias).
 
-## Question 8
 
-When the classes are well-separated, the parameter estimates for the logistic regression model are surprisingly unstable. In contrast, Linear Discriminant Analysis (LDA) does not suffer from this problem. 
+> e. Repeat (a) for the irreducible error.
 
-#### High-Level Explanation
+For part (e), the correct statement is:
 
-##### Logistic Regression
-- **Issue**: In logistic regression, when classes are well-separated, the algorithm tries to push the decision boundary far away from the data points to perfectly separate the classes. This can lead to extremely large parameter estimates as the model attempts to achieve a perfect classification.
-- **Example**: Imagine trying to separate two groups of points on a line, one group clustered near 0 and the other near 100. Logistic regression will push the decision boundary towards infinity to ensure no overlap, resulting in very large coefficients.
+v. Remain constant.
 
-##### Linear Discriminant Analysis (LDA)
-- **Stability**: LDA assumes that the data from each class are drawn from a Gaussian distribution with the same covariance matrix but different means. This assumption about the data structure makes LDA more stable in the presence of well-separated classes.
-- **Example**: Using the same groups of points, LDA focuses on the means and shared covariance of the groups to find a linear decision boundary. The separation does not push the boundary to extremes, leading to more stable estimates.
+**Justification:**
 
-#### Low-Level Statistical Details
+- Irreducible error, also known as the noise term in the model, represents the part of the error that cannot be reduced by any model due to the inherent variability in the data or the unknown factors that affect the output. It is not a function of the model's complexity, the choice of predictors, or the value of $s$ in regularization.
 
-##### Logistic Regression
-- **Mathematical Insight**: Logistic regression models the log odds of the probability of class membership as a linear function of the input variables. In cases of perfect or near-perfect separation, the likelihood function becomes flat, leading to infinite or very large values for the coefficients as the model tries to maximize the likelihood of the observed data.
-- **Statistical Consequence**: This leads to instability in parameter estimates because small changes in the data can lead to large changes in the parameter estimates.
+- Since the irreducible error is determined by the data itself and not by how the model is specified or optimized, changing the value of $s$ in a regularization context (like Lasso or Ridge Regression) does not impact the irreducible error. The irreducible error remains constant regardless of how model parameters are adjusted, including the regularization parameter $s$.
 
-##### Linear Discriminant Analysis (LDA)
-- **Mathematical Insight**: LDA models the data as coming from different Gaussian distributions with the same covariance matrix. It uses the mean and variance of the data to find a linear combination of features that separates the classes.
-- **Statistical Consequence**: The assumption of a common covariance matrix and the focus on the means of the distributions make the parameter estimates in LDA more stable, even when classes are well-separated. The parameters are estimated directly from the data's mean and variance, which are less affected by the separation of the classes.
+- The concept of irreducible error is important in understanding the limits of predictive modeling. No matter how sophisticated the model is or how optimal the regularization parameter is chosen, the irreducible error sets a lower bound on the error that can be achieved on new data.
 
-In summary, the instability of logistic regression in the face of well-separated classes stems from its likelihood maximization process, which can push parameter estimates to extremes. In contrast, LDA's assumptions about the data structure lead to more stable parameter estimates under similar conditions.
+Therefore, as $s$ is varied to adjust the model's complexity in the context of regularization, the irreducible error component of the total error remains unaffected and constant.
 
+### Question 4
 
-## Question 9
+> Suppose we estimate the regression coefficients in a linear regression model
+> by minimizing
+>
+> $$
+> \sum_{i=1}^n \left(y_i - \beta_0 - \sum_{j=1}^p\beta_jx_{ij}\right)^2 +
+>   \lambda\sum_{j=1}^p\beta_j^2
+> $$
+>
+> for a particular value of $\lambda$. For parts (a) through (e), indicate which of i. through v. is correct. Justify your answer.
+>
+> a. As we increase $\lambda$ from 0, the training RSS will:
+>    i. Increase initially, and then eventually start decreasing in an inverted U shape.
+>    ii. Decrease initially, and then eventually start increasing in a U shape.
+>    iii. Steadily increase.
+>    iv. Steadily decrease.
+>    v. Remain constant.
 
-When the sample size \(n\) is small and the distribution of the predictor \(X\) is approximately normal in each of the classes, Linear Discriminant Analysis (LDA) tends to be more stable than logistic regression. Why?
+For part (a), the correct statement is:
 
-## Answer 9
+iii. Steadily increase.
 
-#### Linear Discriminant Analysis (LDA)
-- **Assumptions**: LDA assumes that the predictors \(X\) follow a normal distribution within each class, and that each class has the same covariance matrix. These assumptions align well with the given conditions (small \(n\) and normal \(X\) distributions).
-- **Parameter Estimation**: LDA estimates parameters based on the mean and variance within each class, as well as the overall covariance matrix. When \(X\) distributions are normal and sample sizes are small, these estimates remain relatively stable because they directly leverage the assumed distributional properties of \(X\).
-- **Stability**: The model's stability in small samples comes from its reliance on aggregate measures (mean, variance) that are less sensitive to individual data point fluctuations, which is crucial when \(n\) is small.
+**Justification:**
 
-#### Logistic Regression
-- **Assumptions**: Logistic regression does not make explicit assumptions about the distribution of predictor variables. It models the log odds of the dependent variable as a linear combination of the predictors.
-- **Parameter Estimation**: The estimation in logistic regression is based on maximizing the likelihood of the observed data. With small sample sizes, this process can become unstable because there is less data to accurately estimate the model parameters. The lack of distributional assumptions means that logistic regression relies more heavily on the data to shape the model, which can lead to overfitting or high variance in parameter estimates when \(n\) is small.
-- **Stability**: The potential for instability arises from the model's sensitivity to the specific sample when that sample is small. Without the normality assumption to guide the estimation, logistic regression can produce widely varying estimates depending on the particularities of the sample data.
+- The given equation represents the cost function of Ridge Regression, which adds a penalty term to the ordinary least squares (OLS) regression. The penalty term is $\lambda\sum_{j=1}^p\beta_j^2$, where $\lambda$ is the regularization parameter that controls the strength of the penalty applied to the size of the coefficients.
 
-#### Conclusion
+- When $\lambda = 0$, the Ridge Regression model reduces to the ordinary least squares regression model, as the penalty term has no effect. In this case, the model is fully flexible within the constraints of being linear and will fit the training data as closely as possible, resulting in the lowest possible training RSS for a linear model given the data.
 
-In scenarios with small sample sizes and normally distributed predictors within each class, LDA's assumptions about the data lead to more stable parameter estimates compared to logistic regression. LDA leverages these distributional assumptions to make more informed estimates even when data is limited, whereas logistic regression's lack of distributional assumptions can result in greater instability in parameter estimates under the same conditions.
+- As $\lambda$ increases from 0, the penalty on the size of the coefficients becomes more significant. This penalty discourages large values of the coefficients, effectively shrinking them towards zero. The shrinkage increases bias in the model because it is less able to fit the training data closely, leading to an increase in the training RSS.
 
+- The increase in $\lambda$ continues to constrain the model further, making it less flexible and causing the training RSS to steadily increase. The model becomes increasingly biased, and its ability to capture the variability in the training data diminishes, resulting in higher RSS values.
 
+- Therefore, as $\lambda$ increases from 0, the training RSS will steadily increase because the model is increasingly penalized for complexity, leading to higher bias and less fit to the training data.
 
-## Low-Dimensional Views with LDA for Multiclass Responses
 
-Linear Discriminant Analysis (LDA) is a technique that is particularly useful for providing low-dimensional views of data, especially in scenarios involving more than two response classes. This capability is a direct result of LDA's mathematical formulation and its approach to dimensionality reduction and class separation.
+> b. Repeat (a) for test RSS.
 
-#### Foundation of LDA
+ii. As $\lambda$ increases, flexibility decreases so test RSS will decrease (variance decreases) but will then increase (as bias increases).
 
-LDA seeks to find linear combinations of the features that best separate the classes. For a dataset with \(p\) features and \(K\) classes, LDA aims to project the data onto a lower-dimensional space (with up to \(K-1\) dimensions) that maximizes the separation between these classes. This is achieved by maximizing the ratio of the between-class variance to the within-class variance in this lower-dimensional space.
+**Conceptual Explanation:**
 
-#### Mechanism for Low-Dimensional Views
+- As $\lambda$ increases from 0, the Ridge Regression model initially may see an improvement in test RSS. This improvement occurs because the penalty term helps to prevent overfitting by shrinking the coefficients, which can lead to a model that generalizes better to unseen data. This phase corresponds to a decrease in test RSS due to the reduction in variance outweighing the increase in bias.
 
-##### Dimensionality Reduction
+- However, as $\lambda$ continues to increase beyond a certain point, the model becomes too simple, overly penalizing the coefficients, which leads to underfitting. In this phase, the test RSS may start to increase because the model is no longer complex enough to capture the underlying patterns in the data, resulting in an increase in bias that outweighs the benefits of reduced variance.
 
-- **Projection**: LDA projects the high-dimensional data onto a new space defined by the linear discriminants, which are directions in the feature space that provide the best class separation.
-- **Reduced Dimensions**: The maximum number of linear discriminants (or axes) is \(K-1\), where \(K\) is the number of classes. This means that even for data with a large number of features, LDA can reduce the dimensionality to at most \(K-1\) dimensions, facilitating visualization and analysis.
+- Therefore, the behavior of test RSS as $\lambda$ increases is characterized by an initial decrease as the model becomes more regularized and less prone to overfitting, followed by a potential increase as overfitting is mitigated but underfitting begins to occur. This pattern suggests a U-shaped relationship between test RSS and $\lambda$, where there is an optimal level of $\lambda$ that minimizes test RSS before it starts to increase due to excessive penalization and underfitting.
 
-##### Visualization and Interpretation
+> c. Repeat (a) for variance.
 
-- **Visualization**: By projecting the data onto the first two or three linear discriminants, LDA allows for easy visualization of the data in two or three dimensions. This can be particularly helpful in understanding how well-separated the classes are in the reduced-dimensional space.
-- **Interpretation**: The directions of the linear discriminants can also provide insights into which features are most important for distinguishing between classes. This interpretability is a key advantage of LDA, as it not only reduces dimensionality but also highlights features relevant to class separation.
+For part (c), the correct statement is:
+iv.
 
-#### Advantages in Multiclass Scenarios
+Variance should generally decrease as $\lambda$ increases, because the model becomes consistently simpler and less sensitive to the training data.
 
-- **Direct Multiclass Handling**: Unlike some methods that require adaptations to handle multiclass scenarios, LDA naturally extends to more than two classes, directly incorporating multiclass separation into its formulation.
-- **Class-Specific Projections**: The dimensionality reduction in LDA is guided by the goal of class separation, which means that the reduced-dimensional views are specifically optimized to highlight differences between the classes, unlike other methods like PCA which do not consider class labels.
 
-#### Conclusion
+> d. Repeat (a) for (squared) bias.
 
-LDA's ability to provide low-dimensional views of data when handling more than two response classes stems from its focus on finding the most discriminative directions for class separation. This not only aids in visualization and interpretation by reducing the complexity of the data but also ensures that the reduced dimensions are meaningful in terms of class differentiation. The result is a powerful tool for both exploratory data analysis and model building in multiclass classification problems.
+iii. Steadily increase.
+
+- The increase in $\lambda$ leads to a steady increase in the squared bias. This is because the model becomes increasingly simplistic, moving further away from the complexity needed to capture the true underlying data generating process. The simplification results in predictions that are, on average, further from the true values, hence an increase in bias.
+
+
+> e. Repeat (a) for the irreducible error.
+
+v. The irreducible error is unchanged.
+
+### Question 5
+
+> It is well-known that ridge regression tends to give similar coefficient values to correlated variables, whereas the lasso may give quite different coefficient values to correlated variables. We will now explore this property in a very simple setting.
+>
+> Suppose that $n = 2, p = 2, x_{11} = x_{12}, x_{21} = x_{22}$. Furthermore, suppose that $y_1 + y_2 =0$ and $x_{11} + x_{21} = 0$ and $x_{12} + x_{22} = 0$, so that the estimate for the intercept in a least squares, ridge regression, or lasso model is zero: $\hat{\beta}_0 = 0$.
+>
+> a. Write out the ridge regression optimization problem in this setting.
+
+In the given setting, the ridge regression optimization problem can be written as follows:
+
+Given that $n = 2$, $p = 2$, with $x_{11} = x_{12}$, $x_{21} = x_{22}$, $y_1 + y_2 = 0$, and $x_{11} + x_{21} = 0$ (which also implies $x_{12} + x_{22} = 0$), and $\hat{\beta}_0 = 0$, the ridge regression optimization problem is to minimize:
+
+$$
+\sum_{i=1}^{2} \left(y_i - \beta_1 x_{i1} - \beta_2 x_{i2}\right)^2 + \lambda \left(\beta_1^2 + \beta_2^2\right)
+$$
+
+where:
+- $y_i$ are the response variables,
+- $x_{i1}$ and $x_{i2}$ are the predictor variables,
+- $\beta_1$ and $\beta_2$ are the coefficients to be estimated,
+- $\lambda$ is the regularization parameter that controls the amount of shrinkage applied to the coefficients.
+
+This formulation directly incorporates the ridge penalty, $\lambda \left(\beta_1^2 + \beta_2^2\right)$, which penalizes the square of the coefficients, effectively shrinking them towards zero depending on the value of $\lambda$. The goal of this optimization problem is to find the values of $\beta_1$ and $\beta_2$ that minimize the penalized residual sum of squares.
+
+> b. Argue that in this setting, the ridge coefficient estimates satisfy $\hat{\beta}_1 = \hat{\beta}_2$
+
+To mathematically prove that $\hat{\beta}_1 = \hat{\beta}_2$ in the given setting for ridge regression, let's start with the optimization problem:
+
+$$
+\sum_{i=1}^{2} \left(y_i - \beta_1 x_{i1} - \beta_2 x_{i2}\right)^2 + \lambda \left(\beta_1^2 + \beta_2^2\right)
+$$
+
+Given the conditions:
+- $x_{11} = x_{12}$, $x_{21} = x_{22}$
+- $x_{11} + x_{21} = 0$ and $x_{12} + x_{22} = 0$, which implies $x_{11} = -x_{21}$ and $x_{12} = -x_{22}$
+- $y_1 + y_2 = 0$, which implies $y_1 = -y_2$
+
+Substituting the conditions into the optimization problem:
+
+$$
+\sum_{i=1}^{2} \left(y_i - \beta_1 x_{i} - \beta_2 x_{i}\right)^2 + \lambda \left(\beta_1^2 + \beta_2^2\right)
+$$
+
+Since $x_{i1} = x_{i2} = x_i$, we can simplify the expression:
+
+$$
+(y_1 - \beta_1 x_1 - \beta_2 x_1)^2 + (y_2 - \beta_1 x_2 - \beta_2 x_2)^2 + \lambda (\beta_1^2 + \beta_2^2)
+$$
+
+Given $x_1 = -x_2$ and $y_1 = -y_2$, let's substitute $x_2 = -x_1$ and $y_2 = -y_1$:
+
+$$
+(y_1 - (\beta_1 + \beta_2) x_1)^2 + (-y_1 - (\beta_1 + \beta_2) (-x_1))^2 + \lambda (\beta_1^2 + \beta_2^2)
+$$
+
+This simplifies to:
+
+$$
+2(y_1 - (\beta_1 + \beta_2) x_1)^2 + \lambda (\beta_1^2 + \beta_2^2)
+$$
+
+To minimize this expression with respect to $\beta_1$ and $\beta_2$, we take the partial derivatives and set them to zero.
+
+For $\beta_1$:
+
+$$
+\frac{\partial}{\partial \beta_1} \left[ 2(y_1 - (\beta_1 + \beta_2) x_1)^2 + \lambda (\beta_1^2 + \beta_2^2) \right] = 0
+$$
+
+For $\beta_2$:
+
+$$
+\frac{\partial}{\partial \beta_2} \left[ 2(y_1 - (\beta_1 + \beta_2) x_1)^2 + \lambda (\beta_1^2 + \beta_2^2) \right] = 0
+$$
+
+Both partial derivatives will yield equations that are symmetric in $\beta_1$ and $\beta_2$. The symmetry in these equations implies that any solution for $\beta_1$ and $\beta_2$ that minimizes the expression must satisfy $\beta_1 = \beta_2$, as the roles of $\beta_1$ and $\beta_2$ are interchangeable in the context of the optimization problem due to the identical contributions of $x_{i1}$ and $x_{i2}$ to the model.
+
+Thus, mathematically, it's shown that in this specific setting, the ridge regression coefficient estimates must satisfy $\hat{\beta}_1 = \hat{\beta}_2$.
+
+
+> c. Write out the lasso optimization problem in this setting.
+
+We are trying to minimize:
+
+$$
+\sum_{i=1}^n \left(y_i - \beta_0 - \sum_{j=1}^p\beta_jx_{ij}\right)^2 +
+  \lambda\sum_{j=1}^p |\beta_j|
+$$
+
+As above (and defining $x_1 = x_{11} = x_{12}$ and $x_2 = x_{21} = x_{22}$) we simplify to
+
+$$
+(y_1 - \beta_1x_1 - \beta_2x_1)^2 + 
+  (y_2 - \beta_1x_2 - \beta_2x_2)^2 + 
+  \lambda|\beta_1| + \lambda|\beta_2|
+$$
+
+> d. Argue that in this setting, the lasso coefficients $\hat{\beta}_1$ and $\hat{\beta}_2$ are not unique---in other words, there are many possible solutions to the optimization problem in (c). Describe these solutions.
+
+We will consider the alternate form of the lasso optimization problem
+
+$$
+(y_1 - \hat{\beta_1}x_1 - \hat{\beta_2}x_1)^2 + (y_2 - \hat{\beta_1}x_2 - \hat{\beta_2}x_2)^2 \quad \text{subject to} \quad |\hat{\beta_1}| + |\hat{\beta_2}| \le s
+$$
+
+Since $x_1 + x_2 = 0$ and $y_1 + y_2 = 0$, this is equivalent to minimising
+$2(y_1 - (\hat{\beta_1} + \hat{\beta_2})x_1)^2$
+which has a solution when $\hat{\beta_1} + \hat{\beta_2} = y_1/x_1$.
+Geometrically, this is a $45^\circ$ backwards sloping line in the 
+($\hat{\beta_1}$, $\hat{\beta_2}$) plane.
+
+The constraints $|\hat{\beta_1}| + |\hat{\beta_2}| \le s$ specify a diamond 
+shape in the same place, also with lines that are at $45^\circ$ centered at the
+origin and which intersect the axes at a distance $s$ from the origin. 
+
+Thus, points along two edges of the diamond
+($\hat{\beta_1} + \hat{\beta_2} = s$ and $\hat{\beta_1} + \hat{\beta_2} = -s$) 
+become solutions to the lasso optimization problem.
+
+### Question 6
+
+> We will now explore (6.12) and (6.13) further.
+>
+> a. Consider (6.12) with $p = 1$. For some choice of $y_1$ and $\lambda > 0$, plot (6.12) as a function of $\beta_1$. Your plot should confirm that (6.12) is solved by (6.14).
+
+Equation 6.12 is:
+
+$$
+\sum_{j=1}^p(y_j - \beta_j)^2 + \lambda\sum_{j=1}^p\beta_j^2
+$$
+
+Equation 6.14 is:
+
+$$
+\hat{\beta}_j^R = y_j/(1 + \lambda)
+$$
+
+where $\hat{\beta}_j^R$ is the ridge regression estimate.
+
+```{r}
+lambda <- 0.7
+y <- 1.4
+fn <- function(beta) {
+  (y - beta)^2 + lambda * beta^2
+}
+plot(seq(0, 2, 0.01), fn(seq(0, 2, 0.01)), type = "l", xlab = "beta", ylab = "6.12")
+abline(v = y / (1 + lambda), lty = 2)
+```
+
+> b. Consider (6.13) with $p = 1$. For some choice of $y_1$ and $\lambda > 0$, plot (6.13) as a function of $\beta_1$. Your plot should confirm that
+>    (6.13) is solved by (6.15).
+
+Equation 6.13 is:
+
+$$
+\sum_{j=1}^p(y_j - \beta_j)^2 + \lambda\sum_{j=1}^p|\beta_j|
+$$
+
+Equation 6.15 is:
+
+$$
+\hat{\beta}_j^L = \begin{cases}
+  y_j - \lambda/2 &\mbox{if } y_j > \lambda/2; \\
+  y_j + \lambda/2 &\mbox{if } y_j < -\lambda/2; \\
+  0               &\mbox{if } |y_j| \le \lambda/2;
+\end{cases}
+$$
+
+For $\lambda = 0.7$ and $y = 1.4$, the top case applies.
+
+```{r}
+lambda <- 0.7
+y <- 1.4
+fn <- function(beta) {
+  (y - beta)^2 + lambda * abs(beta)
+}
+plot(seq(0, 2, 0.01), fn(seq(0, 2, 0.01)), type = "l", xlab = "beta", ylab = "6.12")
+abline(v = y - lambda / 2, lty = 2)
+```
+
+### Question 7
+
+> We will now derive the Bayesian connection to the lasso and ridge regression
+> discussed in Section 6.2.2.
+>
+> a. Suppose that $y_i = \beta_0 + \sum_{j=1}^p x_{ij}\beta_j + \epsilon_i$
+>    where $\epsilon_1, ..., \epsilon_n$ are independent and identically
+>    distributed from a $N(0, \sigma^2)$ distribution. Write out the likelihood
+>    for the data.
+
+\begin{align*}
+\mathcal{L} 
+  &= \prod_i^n \mathcal{N}(0, \sigma^2) \\
+  &= \prod_i^n \frac{1}{\sqrt{2\pi\sigma}}\exp\left(-\frac{\epsilon_i^2}{2\sigma^2}\right) \\
+  &= \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2\right)
+\end{align*}
+
+> b. Assume the following prior for $\beta$: $\beta_1, ..., \beta_p$ are
+>    independent and identically distributed according to a double-exponential
+>    distribution with mean 0 and common scale parameter b: i.e.
+>    $p(\beta) = \frac{1}{2b}\exp(-|\beta|/b)$. Write out the posterior for
+>    $\beta$ in this setting.
+
+The posterior can be calculated by multiplying the prior and likelihood
+(up to a proportionality constant).
+
+\begin{align*}
+p(\beta|X,Y) 
+  &\propto \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2\right) \prod_j^p\frac{1}{2b}\exp\left(-\frac{|\beta_j|}{b}\right)  \\
+  &\propto \frac{1}{2b} \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 -\sum_j^p\frac{|\beta_j|}{b}\right)
+\end{align*}
+
+> c. Argue that the lasso estimate is the _mode_ for $\beta$ under this
+>    posterior distribution.
+
+Let us find the maximum of the posterior distribution (the mode). Maximizing
+the posterior probability is equivalent to maximizing its log which is:
+
+$$
+\log(p(\beta|X,Y)) \propto  \log\left[ \frac{1}{2b} \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \right ] - \left(\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 + \sum_j^p\frac{|\beta_j|}{b}\right)
+$$
+
+Since, the first term is independent of $\beta$, our solution will be when
+we minimize the second term.
+
+\begin{align*}
+\DeclareMathOperator*{\argmin}{arg\,min} % Jan Hlavacek
+\argmin_\beta \left(\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 + \sum_j^p\frac{|\beta|}{b}\right)
+&= \argmin_\beta \left(\frac{1}{2\sigma^2} \right ) \left( \sum_i^n \epsilon_i^2 +\frac{2\sigma^2}{b}\sum_j^p|\beta_j|\right) \\
+&= \argmin_\beta \left( \sum_i^n \epsilon_i^2 +\frac{2\sigma^2}{b}\sum_j^p|\beta_j|\right)
+\end{align*}
+
+Note, that $RSS = \sum_i^n \epsilon_i^2$ and if we set $\lambda =
+\frac{2\sigma^2}{b}$, the mode corresponds to lasso optimization.
+$$
+\argmin_\beta RSS + \lambda\sum_j^p|\beta_j|
+$$
+
+> d. Now assume the following prior for $\beta$: $\beta_1, ..., \beta_p$ are
+>    independent and identically distributed according to a normal distribution
+>    with mean zero and variance $c$. Write out the posterior for $\beta$ in
+>    this setting.
+
+The posterior is now:
+
+\begin{align*}
+p(\beta|X,Y) 
+  &\propto \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2\right) \prod_j^p\frac{1}{\sqrt{2\pi c}}\exp\left(-\frac{\beta_j^2}{2c}\right)  \\
+  &\propto 
+   \left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n 
+   \left(\frac{1}{\sqrt{2\pi c}}\right)^p
+\exp\left(-\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 - \frac{1}{2c}\sum_j^p\beta_j^2\right)
+\end{align*}
+
+> e. Argue that the ridge regression estimate is both the _mode_ and the _mean_
+>    for $\beta$ under this posterior distribution.
+
+To show that the ridge estimate is the mode we can again find the maximum by
+maximizing the log of the posterior. The log is 
+
+$$
+\log{p(\beta|X,Y)}
+  \propto 
+   \log{\left[\left(\frac{1}{\sqrt{2\pi\sigma}}\right)^n \left(\frac{1}{\sqrt{2\pi c}}\right)^p \right ]}
+- \left(\frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 + \frac{1}{2c}\sum_j^p\beta_j^2 \right)
+$$
+
+We can maximize (wrt $\beta$) by ignoring the first term and minimizing the
+second term. i.e. we minimize:
+
+$$
+\argmin_\beta \left( \frac{1}{2\sigma^2} \sum_i^n \epsilon_i^2 + \frac{1}{2c}\sum_j^p\beta_j^2 \right)\\
+= \argmin_\beta \left( \frac{1}{2\sigma^2} \left( \sum_i^n \epsilon_i^2 + \frac{\sigma^2}{c}\sum_j^p\beta_j^2 \right) \right)
+$$
+
+As above, if $RSS = \sum_i^n \epsilon_i^2$ and if we set $\lambda =
+\frac{\sigma^2}{c}$, we can see that the mode corresponds to ridge optimization.
